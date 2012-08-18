@@ -1,0 +1,41 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant::Config.run do |config|
+
+  # PXE boot server
+  config.vm.define :pxe do |pxe_config|
+    pxe_config.vm.box = "cleanp"
+    #pxe_config.vm.network :bridged
+    #pxe_config.vm.network :bridged, "192.168.1.177"
+    pxe_config.vm.network :hostonly, "192.168.33.2"
+    pxe_config.vm.provision :shell, :path => "ansible_playbooks/bootstrap_ubuntu_ansible.sh"
+
+  end
+
+  # Cloud Controller
+  config.vm.define :cc do |cc_config|
+    cc_config.vm.box = "cleanp"
+    # hostonly dhcp...dhcp comes from vagrant though...
+    cc_config.vm.customize ["modifyvm", :id, "--memory", 1024]
+    cc_config.vm.boot_mode = :gui
+    #cc_config.vm.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+
+    cc_config.vm.customize ["modifyvm", :id, "--nic1", "hostonly"]
+    cc_config.vm.customize ["modifyvm", :id, "--macaddress1", "auto"]
+    #cc_config.vm.customize ["modifyvm", :id, "--nictype2", "virtio"]
+    cc_config.vm.customize ["modifyvm", :id, "--nictype1", "Am79C973"]
+    cc_config.vm.customize ["modifyvm", :id, "--hostonlyadapter1", "vboxnet0"]
+    cc_config.vm.customize ["modifyvm", :id, "--boot2", "net"]
+
+  end
+
+  # Nova node
+  config.vm.define :node0 do |node0_config|
+    node0_config.vm.box = "cleanp"
+    #node0_config.vm.network :hostonly, :dhcp
+    node0_config.vm.customize ["modifyvm", :id, "--memory", 1024]
+    node0_config.vm.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+  end
+
+end
