@@ -13,6 +13,38 @@ Vagrant::Config.run do |config|
 
   end
 
+  config.vm.define :node0 do |node0_config|
+    node0_config.vm.box = "raid"
+    node0_config.vm.customize ["modifyvm", :id, "--memory", 1024]
+    node0_config.vm.boot_mode = :gui
+    # should be the right nic driver and promiscuous in the raid.box
+    node0_config.vm.customize ["modifyvm", :id, "--nic1", "hostonly"]
+    node0_config.vm.customize ["modifyvm", :id, "--nic2", "hostonly"]
+    node0_config.vm.customize ["modifyvm", :id, "--nic3", "hostonly"]
+    node0_config.vm.customize ["modifyvm", :id, "--nictype1", "Am79C973"]
+    node0_config.vm.customize ["modifyvm", :id, "--nictype2", "Am79C973"]
+    node0_config.vm.customize ["modifyvm", :id, "--nictype3", "Am79C973"]
+    node0_config.vm.customize ["modifyvm", :id, "--hostonlyadapter1", "vboxnet0"]
+    node0_config.vm.customize ["modifyvm", :id, "--hostonlyadapter2", "vboxnet1"]
+    node0_config.vm.customize ["modifyvm", :id, "--hostonlyadapter3", "vboxnet1"]
+    node0_config.vm.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+    node0_config.vm.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+    node0_config.vm.customize ["modifyvm", :id, "--macaddress1", "auto"]
+    node0_config.vm.customize ["modifyvm", :id, "--macaddress2", "auto"]
+    node0_config.vm.customize ["modifyvm", :id, "--macaddress3", "auto"]
+
+  end
+
+  config.vm.define :node1 do |node1_config|
+    node1_config.vm.box = "raid"
+    node1_config.vm.customize ["modifyvm", :id, "--memory", 1024]
+    node1_config.vm.boot_mode = :gui
+    # should be the right nic driver and promiscuous in the raid.box
+    node1_config.vm.customize ["modifyvm", :id, "--macaddress1", "auto"]
+    node1_config.vm.customize ["modifyvm", :id, "--macaddress2", "auto"]
+    node1_config.vm.customize ["modifyvm", :id, "--macaddress3", "auto"]
+  end
+
   # Cloud Controller
   config.vm.define :cc do |cc_config|
     cc_config.vm.box = "cleanp"
@@ -27,15 +59,26 @@ Vagrant::Config.run do |config|
     cc_config.vm.customize ["modifyvm", :id, "--nictype1", "Am79C973"]
     cc_config.vm.customize ["modifyvm", :id, "--hostonlyadapter1", "vboxnet0"]
     cc_config.vm.customize ["modifyvm", :id, "--boot2", "net"]
+    #cc_config.vm.customize ["createhd", "/Users/curtis/VirtualBox VMs/" + :id + "/box-disk2.vmdk", "--size 10000", "--remember"]
+    cc_config.vm.customize ["createhd", "--filename", "/Users/curtis/working/vagrant/cobbler/box-disk1.vmdk", "--size", "10000", "--format", "vmdk"]
+    cc_config.vm.customize ["createhd", "--filename", "/Users/curtis/working/vagrant/cobbler/box-disk2.vmdk", "--size", "10000", "--format", "vmdk"]
+    cc_config.vm.customize ["createhd", "--filename", "/Users/curtis/working/vagrant/cobbler/box-disk3.vmdk", "--size", "10000", "--format", "vmdk"]
+    cc_config.vm.customize ["createhd", "--filename", "/Users/curtis/working/vagrant/cobbler/box-disk4.vmdk", "--size", "10000", "--format", "vmdk"]
 
-  end
 
-  # Nova node
-  config.vm.define :node0 do |node0_config|
-    node0_config.vm.box = "cleanp"
-    #node0_config.vm.network :hostonly, :dhcp
-    node0_config.vm.customize ["modifyvm", :id, "--memory", 1024]
-    node0_config.vm.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+    #VBoxManage createhd --filename "example-vmname.vdi" --size 10000 --remember
+    #cc_config.vm.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", "0", "--device", "1", "--type", "hdd", "--medium", "/Users/curtis/VirtualBox VMs/" + :id + "/box-disk2.vmdk"]
+ 
+    # Could this be in a while loop?
+    # This still imports the box...
+
+    cc_config.vm.customize ["storagectl", :id, "--name", "SATA Controller 2", "--add", "sata",  "--controller", "IntelAHCI", "--sataportcount", "4", "--hostiocache", "off"]
+    cc_config.vm.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", "0", "--device", "0", "--type", "hdd", "--medium", "/Users/curtis/working/vagrant/cobbler/box-disk1.vmdk"]
+    cc_config.vm.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", "0", "--device", "1", "--type", "hdd", "--medium", "/Users/curtis/working/vagrant/cobbler/box-disk1.vmdk"]
+    cc_config.vm.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", "0", "--device", "2", "--type", "hdd", "--medium", "/Users/curtis/working/vagrant/cobbler/box-disk1.vmdk"]
+    cc_config.vm.customize ["storageattach", :id, "--storagectl", "SATA Controller", "--port", "0", "--device", "3", "--type", "hdd", "--medium", "/Users/curtis/working/vagrant/cobbler/box-disk1.vmdk"]
+    #VBoxManage storageattach "example-vmname" --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium "example-vmname.vdi"
+
   end
 
 end
