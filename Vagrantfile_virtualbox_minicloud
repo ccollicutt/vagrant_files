@@ -1,0 +1,27 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant::Config.run do |config|
+
+  config.vm.define :cc01 do |cc01_config|
+    cc01_config.vm.box = "precise64"
+    config.vm.provision :shell, :path => "ansible_playbooks/bootstrap_ubuntu_ansible.sh"
+    cc01_config.vm.network :hostonly, "192.168.33.101"
+    cc01_config.vm.network :hostonly, "192.168.100.130" # nic3
+    cc01_config.vm.host_name = "cc01"
+    cc01_config.vm.customize ["modifyvm", :id, "--memory", "2048"]
+    cc01_config.vm.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+
+  end
+
+  config.vm.define :node01 do |node01_config|
+    node01_config.vm.box = "precise64"
+    node01_config.vm.provision :shell, :path => "ansible_playbooks/bootstrap_ubuntu_ansible.sh"
+    node01_config.vm.network :hostonly, "192.168.33.102"
+    node01_config.vm.network :hostonly, "192.168.100.131" # nic3
+    node01_config.vm.host_name = "node01"
+    node01_config.vm.customize ["modifyvm", :id, "--memory", "2048"]
+    node01_config.vm.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+  end
+
+end
