@@ -4,14 +4,17 @@
 Vagrant::Config.run do |config|
 
   config.vm.define :cc01 do |cc01_config|
+    #cc01_config.vm.boot_mode = :gui
     cc01_config.vm.box = "precise64"
-    config.vm.provision :shell, :path => "ansible_playbooks/bootstrap_ubuntu_ansible.sh"
+    cc01_config.vm.provision :shell, :path => "ansible_playbooks/bootstrap_ubuntu_ansible.sh"
     cc01_config.vm.network :hostonly, "192.168.33.101"
     cc01_config.vm.network :hostonly, "192.168.100.130" # nic3
     cc01_config.vm.host_name = "cc01"
     cc01_config.vm.customize ["modifyvm", :id, "--memory", "2048"]
+    cc01_config.vm.customize ["modifyvm", :id, "--nictype2", "Am79C973"]
+    cc01_config.vm.customize ["modifyvm", :id, "--nictype3", "Am79C973"]
+    cc01_config.vm.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
     cc01_config.vm.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
-
   end
 
   config.vm.define :node01 do |node01_config|
@@ -21,7 +24,23 @@ Vagrant::Config.run do |config|
     node01_config.vm.network :hostonly, "192.168.100.131" # nic3
     node01_config.vm.host_name = "node01"
     node01_config.vm.customize ["modifyvm", :id, "--memory", "2048"]
+    node01_config.vm.customize ["modifyvm", :id, "--nictype2", "Am79C973"]
+    node01_config.vm.customize ["modifyvm", :id, "--nictype3", "Am79C973"]
+    node01_config.vm.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
     node01_config.vm.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+  end
+
+  config.vm.define :node02 do |node02_config|
+    node02_config.vm.box = "precise64"
+    node02_config.vm.provision :shell, :path => "ansible_playbooks/bootstrap_ubuntu_ansible.sh"
+    node02_config.vm.network :hostonly, "192.168.33.103"
+    node02_config.vm.network :hostonly, "192.168.100.132" # nic3
+    node02_config.vm.host_name = "node02"
+    node02_config.vm.customize ["modifyvm", :id, "--memory", "2048"]
+    node02_config.vm.customize ["modifyvm", :id, "--nictype2", "Am79C973"]
+    node02_config.vm.customize ["modifyvm", :id, "--nictype3", "Am79C973"]
+    node02_config.vm.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+    node02_config.vm.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
   end
 
 end
